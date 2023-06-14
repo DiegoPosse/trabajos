@@ -1,0 +1,97 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+  background-image: url(/asset/mesa-madera-fondo-borroso.jpg) ;
+  background-size: cover;
+  background-position: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Pacifico', cursive;
+  font-size: xx-large;
+  text-align: center;
+  color: #f2ea0d;
+  
+}
+div {
+  font-family: 'Pacifico', sans-serif;
+  font-size: large;
+  text-align: center;
+  color: #131321;
+  
+}
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: large;
+  width: 80%;
+  max-width: 800px;
+  background-color: #cdc9c9;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+thead {
+  background-color: #ddd;
+  font-size: large;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  font-size: large;
+}
+
+th {
+  text-transform: uppercase;
+}
+
+tfoot td:first-child {
+  text-align: right;
+}
+
+#total {
+  font-weight: bold;
+}
+
+.cliente {
+  margin: 0 auto;
+  width: 80%;
+  max-width: 800px;
+  background-color: #c6c3c3;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.cliente label {
+  display: block;
+  margin: 10px 0;
+  background-color: #b9b5b5;
+}
+
+.cliente input[type="text"],
+.cliente input[type="email"],
+.cliente input[type="tel"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin: 10px 0;
+}
+
+.cliente button[type="button"] {
+  background-color: #4CAF50;
+  border: none;
+  color: #cfcccc;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cliente button[type="button"]:hover {
+  background-color: #367d39;
+}

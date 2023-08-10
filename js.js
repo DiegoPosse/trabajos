@@ -1,11 +1,16 @@
-let libros = JSON.parse(localStorage.getItem("libros")) || [];
 // Crea un array vacío para almacenar los libros seleccionados en el carrito
-let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let librosTraidos=[]
+let libros=[]
+let carrito = [];
+localStorage.clear();
 
+const urlLibros = 
+  "https://648bd8ca8620b8bae7ebda6d.mockapi.io/libros"
+traerlibros(librosTraidos)
 
 // Guardar la lista actualizada de libros en el localStorage
 localStorage.setItem("libros", JSON.stringify(libros));
-mostrarLibros();
+
 
 // Escucha el evento submit del formulario
 formulario.addEventListener("submit", (event) => {
@@ -38,14 +43,11 @@ function agregarLibro() {
       autor: autor,
       precio: parseFloat(precio),
       stock: parseFloat(stock),
-    };
-    libros.push(libro);
-    localStorage.setItem("libros", JSON.stringify(libros));
-
-
-    // Actualiza la tabla con los libros
-    mostrarLibros();
-
+   };
+   libros.push(libro)
+   localStorage.setItem("libros", JSON.stringify(libros))
+    agregarLibroAsync(libro)
+   
 
     Swal.fire({
       icon: 'success',
@@ -59,7 +61,7 @@ function agregarLibro() {
 }
 
 // Llama a la funcion eliminarLibro() con el identificador de la fila
-function eliminarLibro(idFila) {
+function eliminarLibro(idFila,id) {
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: 'btn btn-success',
@@ -94,8 +96,10 @@ function eliminarLibro(idFila) {
       let tabla = document.getElementById("tabla");
       let fila = document.getElementById(idFila);
       tabla.deleteRow(fila.rowIndex - 1);
-      mostrarLibros();
 
+      eliminarLibroAsync(id)
+      //mostrarLibros();
+       //traerlibros() 
     } else if (
       result.dismiss === Swal.DismissReason.cancel
     ) {
@@ -134,6 +138,7 @@ function mostrarLibros() {
       let celdastock = fila.insertCell(3);
       let celdaCheckbox = fila.insertCell(4);
       let celdaEliminar = fila.insertCell(5);
+      let id = libro.id
       celdaTitulo.innerHTML = libro.titulo;
       celdaAutor.innerHTML = libro.autor;
       celdaPrecio.innerHTML = "$" + libro.precio;
@@ -141,18 +146,22 @@ function mostrarLibros() {
       let botonEliminar = document.createElement("button");
       botonEliminar.innerText = "Eliminar";
       botonEliminar.addEventListener("click", function () {
-        eliminarLibro(fila.id);
+        eliminarLibro(fila.id,id);
       });
       celdaEliminar.appendChild(botonEliminar);
       fila.id = "fila-" + i;
       let checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.value = i;
+      // Verificar si el libro esta en el array carritos
+      if (carrito.some(libroCarrito => libroCarrito.titulo === libro.titulo)) {
+        checkbox.checked = true;
+      }
       celdaCheckbox.appendChild(checkbox);
-      checkbox.addEventListener("click", function () {
+     checkbox.addEventListener("click", function () {
         let libro = libros[this.value];
         agregarAlCarrito(libro);
-      });
+     });
     }
   }
 
@@ -184,6 +193,7 @@ function mostrarCarrito() {
       let celdaCantidad = fila.insertCell(3);
       let botonEliminar = document.createElement("button");
       let celdastock = libro.stock;
+      let idCarrito= libro.id;
       celdaTitulo.innerHTML = libro.titulo;
       celdaAutor.innerHTML = libro.autor;
       celdaPrecio.innerHTML = "$" + libro.precio;
@@ -197,12 +207,11 @@ function mostrarCarrito() {
       botonEliminar.textContent = "Eliminar";
       fila.appendChild(botonEliminar);
       botonEliminar.addEventListener("click", function () {
-        removerDelCarrito(libro);
+        removerDelCarrito(libro,idCarrito);
       });
       inputCantidad.addEventListener("input", () => {
         const libroEncontrado = carrito.find((libro) => libro.titulo == inputCantidad.id)
         libroEncontrado.cantidad = inputCantidad.value
-        console.log(libroEncontrado)
         actualizarPreciosTotal();
       });
       actualizarPreciosTotal();
@@ -225,29 +234,31 @@ function agregarAlCarrito(libro) {
     autor : libro.autor,
     precio: libro.precio,
     stock : libro.stock,
-    cantidad: 1
+    cantidad: 1,
+    id : libro.id,
   }
   carrito.push(libroAgregado);
-  console.log(carrito)
   localStorage.setItem("carrito", JSON.stringify(carrito))
   mostrarCarrito()
 }
 
 // Funcion para remover un libro del carrito
-function removerDelCarrito(libro) {
+function removerDelCarrito(libro,id) {
   let index = carrito.indexOf(libro);
   if (index !== -1) {
     carrito.splice(index, 1);
   }
-
+  
+   
+   mostrarLibros() 
+ 
   mostrarCarrito();
-  // actualizarPreciosTotal();
+  
 }
 
 
 // Funcion confirmar compra
 function procesarCompra() {
-
   if (carrito.length === 0) {
     Swal.fire({
       icon: 'error',
@@ -277,6 +288,7 @@ function procesarCompra() {
   });
   // actualizarPreciosTotal();
   localStorage.setItem("carrito", JSON.stringify(carrito));
+  localStorage.setItem("libros", JSON.stringify(libros));
 
   window.location.href = "confirmacion.html";
 
@@ -316,11 +328,44 @@ function validarFormulario() {
 // Funcion para actualizar el Precio total del carrito
 function actualizarPreciosTotal() {
   let precioTotal = carrito.reduce((acc, ite) => acc + ite.precio * ite.cantidad, 0);
-  console.log(precioTotal)
   let totalHTML = document.getElementById("precio-total")
   totalHTML.textContent = "$" + precioTotal.toFixed(2);
   
  
 }
+function traerlibros(){
+  fetch(urlLibros)
+  .then((res) => res.json())
+  .then((data) => {
+    data.forEach((libro)=> {
+      libros.push(libro) 
+  });
+  localStorage.setItem("libros", JSON.stringify(libros));
+  mostrarLibros()
+});
 
-
+}
+async function agregarLibroAsync(libro) {
+  const resp = await fetch(urlLibros, {
+    method: "POST",
+    body: JSON.stringify(libro),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await resp.json();
+  libros.push(data);
+ libros=[]
+ localStorage.removeItem("libros");
+ 
+ traerlibros()
+}
+async function eliminarLibroAsync(id) {
+  const resp = await fetch(`${urlLibros}/${id}`, {
+    method: "DELETE",
+  });
+  const data = await resp.json();
+  mostrarLibros()
+  
+ 
+}
